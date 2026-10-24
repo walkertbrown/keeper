@@ -1,0 +1,6 @@
+{
+  "name": "keeper",
+  "version": "0.1.0",
+  "description": "Rules that hold: each rule arrives at the tool call it governs, gates refuse before an action runs, and corrections are captured and kept.",
+  "license": "MIT"
+}

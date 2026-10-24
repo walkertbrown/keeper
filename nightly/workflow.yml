@@ -1,0 +1,48 @@
+# keeper's nightly run on GitHub. Written by `keeper action __MODE__`; run it again to change mode.
+# Needs one repository secret: ANTHROPIC_API_KEY, or CLAUDE_CODE_OAUTH_TOKEN (from `claude setup-token`).
+name: keeper
+on:
+  schedule: [{ cron: "30 9 * * *" }]   # 9:30 AM UTC every day
+  workflow_dispatch:
+permissions: { contents: write, pull-requests: write }
+concurrency: keeper
+jobs:
+  keep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MODE: __MODE__
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: wait while last night's pull request is open
+        id: open
+        run: |
+          n=0
+          [ "$MODE" = review ] && n=$(gh pr list --label keeper --state open --json number -q length)
+          echo "n=$n" >> "$GITHUB_OUTPUT"
+      - name: keep
+        if: steps.open.outputs.n == '0'
+        env:
+          API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OAUTH: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          [ -n "$API_KEY" ] && export ANTHROPIC_API_KEY="$API_KEY"
+          [ -n "$OAUTH" ] && export CLAUDE_CODE_OAUTH_TOKEN="$OAUTH"
+          npm i -g -s @anthropic-ai/claude-code
+          git config user.name keeper
+          git config user.email keeper@users.noreply.github.com
+          base=$(git rev-parse HEAD)
+          sh .keeper/run.sh nightly
+          [ "$(date +%u)" = 7 ] && sh .keeper/run.sh audit
+          [ "$(git rev-parse HEAD)" = "$base" ] && exit 0
+          if [ "$MODE" = auto ]; then git push -q origin HEAD; exit 0; fi
+          branch="keeper/$(date +%F)"
+          git push -qf origin "HEAD:refs/heads/$branch"
+          git reset -q --hard "$base"
+          gh label create keeper --force -c 5319e7 -d "the keeper's nightly changes" >/dev/null
+          gh pr create --head "$branch" --label keeper --title "keeper: $(date +%F)" \
+            --body "What the keeper decided last night. The reasons are in log/keeper/. Merge to keep them; close to drop them."

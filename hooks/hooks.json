@@ -1,0 +1,10 @@
+{
+  "description": "keeper: rules at the moment they apply, gates that refuse, corrections captured.",
+  "hooks": {
+    "SessionStart":     [{ "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/hook.mjs\" start",  "timeout": 5 }] }],
+    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/hook.mjs\" prompt", "timeout": 3 }] }],
+    "PreToolUse":       [{ "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/hook.mjs\" tool",   "timeout": 3 }] }],
+    "PostToolUse":      [{ "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/hook.mjs\" after",  "timeout": 3 }] }],
+    "SessionEnd":       [{ "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/hook.mjs\" end",    "timeout": 5 }] }]
+  }
+}

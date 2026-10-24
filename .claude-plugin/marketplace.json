@@ -1,0 +1,5 @@
+{
+  "name": "keeper",
+  "owner": { "name": "keeper" },
+  "plugins": [{ "name": "keeper", "source": "./", "description": "Rules that hold: delivered when they apply, gated when they must, measured." }]
+}
