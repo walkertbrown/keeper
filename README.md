@@ -17,7 +17,7 @@ call before it runs. All of them ship off.
 Needs Claude Code, Node 18 or newer, and git.
 
 ```
-/plugin marketplace add <owner>/keeper
+/plugin marketplace add walkertbrown/keeper
 /plugin install keeper
 ```
 
